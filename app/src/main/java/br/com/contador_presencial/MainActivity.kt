@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             Contador_presencialTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    ContadorScreen(
+                    contadorScreen(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun ContadorScreen(modifier: Modifier = Modifier) {
+fun contadorScreen(modifier: Modifier = Modifier) {
     var count by remember { mutableIntStateOf(0) }
 
     Column(
@@ -92,8 +92,8 @@ fun ContadorScreen(modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true)
 @Composable
-fun ContadorScreenPreview() {
+fun contadorScreenPreview() {
     Contador_presencialTheme {
-        ContadorScreen()
+        contadorScreen()
     }
 }
