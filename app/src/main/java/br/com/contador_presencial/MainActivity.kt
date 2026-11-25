@@ -9,10 +9,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fitInside
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -24,8 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import br.com.contador_presencial.ui.theme.Contador_presencialTheme
@@ -48,6 +44,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun contadorScreen(modifier: Modifier = Modifier) {
+    val presencial = "Presencial realizado"
+    val configurations = "Configuração"
     var count by remember { mutableIntStateOf(0) }
 
     Column(
@@ -56,7 +54,7 @@ fun contadorScreen(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Presencial realizado",
+            text = presencial,
             style = MaterialTheme.typography.titleMedium
         )
 
@@ -76,15 +74,7 @@ fun contadorScreen(modifier: Modifier = Modifier) {
             Button(
                 onClick = { if (count > 0) count-- }
             ) {
-                Text(text = "Remover (-1)")
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Button(
-                onClick = { count++ }
-            ) {
-                Text(text = "Adicionar (+1)")
+                Text(text = configurations)
             }
         }
     }
@@ -96,4 +86,9 @@ fun contadorScreenPreview() {
     Contador_presencialTheme {
         contadorScreen()
     }
+}
+
+fun configurationScreen() {
+
+
 }
