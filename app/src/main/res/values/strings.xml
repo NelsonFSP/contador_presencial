@@ -4,8 +4,30 @@
     <string name="configurations">Configuração</string>
     <string name="configuration_title">Configurações</string>
     <string name="back">Voltar</string>
-    <string name="target_days_label">Meta mensal de dias presenciais</string>
-    <string name="target_days_placeholder">Ex: 12</string>
-    <string name="target_days_helper">Informe a quantidade esperada de dias presenciais no mês</string>
+
+    <string name="street_office_address_label">Rua</string>
+    <string name="number_office_address_label">Número</string>
+    <string name="neighbor_office_address_label">Bairro</string>
+    <string name="city_office_address_label">Cidade</string>
+    <string name="state_office_address_label">UF</string>
+
+    <string name="street_office_placeholder">Ex: Rua Maracá</string>
+    <string name="number_office_placeholder">Ex: 123</string>
+    <string name="neighbor_office_placeholder">Ex: Tijuca</string>
+    <string name="city_office_placeholder">Rio de Janeiro</string>
+    <string name="state_office_placeholder">RJ</string>
+
+    <string name="target_períodos_label">Período de contagem</string>
+    <string name="period_weekly">Semanal</string>
+    <string name="period_monthly">Mensal</string>
     <string name="save">Salvar</string>
+    <string name="saving">Salvando…</string>
+
+    <string name="validation_required_field">Campo obrigatório</string>
+    <string name="validation_invalid_number">Informe um número válido maior que zero</string>
+    <string name="validation_invalid_uf">Informe a UF com 2 letras</string>
+    <string name="configuration_saved_success">Configurações salvas com sucesso</string>
+    <string name="configuration_save_error">Não foi possível salvar as configurações</string>
+    <string name="configuration_load_error">Não foi possível carregar as configurações salvas</string>
+    <string name="configuration_validation_error">Verifique os campos obrigatórios antes de salvar</string>
 </resources>

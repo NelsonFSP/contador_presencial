@@ -29,6 +29,9 @@ This document provides architectural standards, development conventions, and ope
 | **Material Icons** | Compose Material Icons Core (`material-icons-core`) | Core vector icons (`ArrowBack`, etc.) |
 | **Navigation** | Jetpack Navigation Compose `2.10.2` | Type-safe navigation with Kotlinx Serialization |
 | **Serialization** | `kotlinx-serialization-json` `1.7.3` + Kotlin Serialization plugin `2.2.10` | Type-safe route arguments & data models |
+| **Persistence** | Room `2.8.5` (`room-runtime`, `room-ktx`, `room-compiler`, `room-testing`) | Local SQLite database with KSP `2.3.14` and schema export (`app/schemas`) |
+| **Lifecycle & ViewModel** | AndroidX Lifecycle `2.11.1` (`lifecycle-viewmodel-compose`, `lifecycle-runtime-compose`, `lifecycle-viewmodel-ktx`) | UDF state management with `ViewModel` and `StateFlow` |
+| **Testing** | JUnit `4.13.2`, `kotlinx-coroutines-test` `1.11.0`, Room Testing `2.8.5` | JVM unit tests and instrumented Room DAO tests |
 
 ---
 
@@ -47,27 +50,44 @@ contador_presencial/
 │   └── wrapper/                          # Gradle wrapper binaries and properties (9.8.2)
 └── app/
     ├── build.gradle.kts                  # App module configuration, plugins, and dependencies
+    ├── schemas/                          # Exported Room database schemas for migrations
     └── src/
         ├── main/
-        │   ├── AndroidManifest.xml       # App manifest, MainActivity declaration, backup rules
+        │   ├── AndroidManifest.xml       # App manifest, Application, MainActivity, backup rules
         │   ├── keepRules/
         │   │   └── rules.keep            # AGP 9 combined R8 keep rules
         │   ├── java/br/com/contador_presencial/
+        │   │   ├── ContadorPresencialApplication.kt # Application entry point & AppContainer
         │   │   ├── MainActivity.kt       # Single activity entry point and ContadorScreen composable
+        │   │   ├── data/
+        │   │   │   ├── local/
+        │   │   │   │   ├── converter/RoomTypeConverters.kt # UUID, Periodicidade, Duration converters
+        │   │   │   │   ├── dao/          # AutorDao, EnderecoDao, HistoricoVisitasDao
+        │   │   │   │   ├── database/AppDatabase.kt # Room database definition & singleton
+        │   │   │   │   └── entity/       # AutorEntity, EnderecoEntity, HistoricoVisitasEntity
+        │   │   │   ├── mapper/DataMappers.kt # Entity <-> Domain model mappers
+        │   │   │   └── repository/       # ConfiguracaoRepositoryImpl, HistoricoVisitasRepositoryImpl
+        │   │   ├── di/
+        │   │   │   └── AppContainer.kt   # Manual dependency injection container
+        │   │   ├── domain/
+        │   │   │   ├── model/            # Autor, Endereco, HistoricoVisitas, ConfiguracaoUsuario, Periodicidade
+        │   │   │   └── repository/       # ConfiguracaoRepository, HistoricoVisitasRepository
         │   │   ├── navigation/
         │   │   │   ├── Routes.kt         # Type-safe navigation routes (@Serializable)
         │   │   │   └── AppNavHost.kt     # AppNavHost definition wiring routes and screens
         │   │   └── ui/
         │   │       ├── screens/
         │   │       │   └── configuration/
-        │   │       │       └── ConfigurationScreen.kt # Configuration screen (Stateful & Stateless)
+        │   │       │       ├── ConfigurationScreen.kt    # Configuration screen (Stateful & Stateless)
+        │   │       │       ├── ConfigurationUiState.kt   # UI state, validation & status models
+        │   │       │       └── ConfigurationViewModel.kt # ViewModel & ViewModelProvider.Factory
         │   │       └── theme/
         │   │           ├── Color.kt      # Material 3 color definitions (Dark & Light schemes)
         │   │           ├── Theme.kt      # Theme wrapper with dynamic color support (Android 12+)
         │   │           └── Type.kt       # Typography scale and text styles
         │   └── res/                      # Android resources (values, mipmaps, drawables, XML configs)
-        ├── test/                         # Local JVM unit tests (JUnit 4)
-        └── androidTest/                  # Instrumented on-device tests (Compose UI Test, Espresso)
+        ├── test/                         # Local JVM unit tests (JUnit 4, Coroutines Test)
+        └── androidTest/                  # Instrumented on-device tests (Compose UI Test, Room, Espresso)
 ```
 
 ---
@@ -119,6 +139,11 @@ contador_presencial/
     - **Stateless Composable (e.g., `ConfigurationContent`):** Receives UI state values and emits user interaction events upward; wraps UI in `Scaffold` and serves as the target for `@Preview`.
 - **Keyboard & Focus Handling:**
   - For text input screens, manage keyboard options (`keyboardType`, `imeAction`) and dismiss or navigate focus via `LocalFocusManager.current` within `keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })`.
+- **Persistence & Clean Data Layer (Room):**
+  - Keep Room `@Entity` classes, `@Dao` interfaces, and `AppDatabase` isolated in `data/local/` and expose only `domain/model/` types from repositories to `ViewModel` / UI layers.
+  - Perform database I/O off the main thread (`Dispatchers.IO` in repositories) and wrap multi-table writes (`Autor` + `Endereco`) inside `database.withTransaction`.
+  - Use `OnConflictStrategy.ABORT` on `@Insert` and explicit `@Update` calls for existing records rather than masking updates with `REPLACE`.
+  - Keep `exportSchema = true` in `AppDatabase` (`app/schemas/`) and define explicit `Migration` or `@AutoMigration` strategies when bumping `DATABASE_VERSION`.
 
 ---
 

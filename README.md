@@ -34,7 +34,7 @@ O **Contador Presencial** nasceu para resolver essa dor com simplicidade, foco e
 ## ✨ Funcionalidades
 
 - [x] **Contador de Presenças:** Visualização destacada da contagem de dias presenciais realizados no período.
-- [x] **Meta Mensal Personalizável:** Tela dedicada de configurações para definir a quantidade esperada de dias no escritório.
+- [x] **Configuração Persistida Localmente:** Tela de configurações integrada ao banco local Room para salvar e carregar dados de endereço e periodicidade (`SEMANAL` / `MENSAL`) com validação de campos obrigatórios.
 - [x] **Navegação Type-Safe:** Fluxo de telas seguro e desacoplado através do Jetpack Navigation Compose tipado com Kotlinx Serialization.
 - [x] **Interface Moderna com Material 3:** Componentes visuais com suporte a Dynamic Color (Material You no Android 12+), Dark/Light theme e tipografia padronizada.
 - [x] **Edge-to-Edge Nativo:** Experiência imersiva aproveitando as áreas de corte e barras do sistema Android.
@@ -59,7 +59,8 @@ O projeto adota padrões modernos da engenharia Android recomendados pelo Google
 | **Material 3** | BOM | Componentes de design system Material You ([Material 3](https://m3.material.io/)) |
 | **Navigation Compose** | `2.10.2` | Navegação reativa e tipada entre composables ([Navigation Compose](https://developer.android.com/guide/navigation/design)) |
 | **Kotlinx Serialization** | `1.7.3` | Serialização tipada de rotas e estruturas de dados ([Kotlinx Serialization](https://github.com/Kotlin/kotlinx.serialization)) |
-| **AndroidX Core KTX / Lifecycle** | `1.10.1` / `2.6.1` | Extensões Kotlin e ciclos de vida reativos ([AndroidX](https://developer.android.com/jetpack/androidx)) |
+| **Room & KSP** | `2.8.5` / `2.3.14` | Persistência local SQLite tipada com geração via KSP ([Room](https://developer.android.com/training/data-storage/room)) |
+| **AndroidX Core KTX / Lifecycle** | `1.10.1` / `2.11.1` | Extensões Kotlin, `ViewModel` e integração de ciclo de vida com Compose ([AndroidX](https://developer.android.com/jetpack/androidx)) |
 | **AGP & R8 Optimization** | `9.5.1` | Android Gradle Plugin 9 com otimização e minificação via R8 ([AGP Release Notes](https://developer.android.com/build/releases/gradle-plugin)) |
 
 ---
@@ -120,26 +121,33 @@ Organização simplificada dos módulos e pacotes do projeto:
 contador_presencial/
 ├── app/
 │   ├── build.gradle.kts                # Configuração do módulo Android (Plugins, SDKs, Dependências)
+│   ├── schemas/                        # Schemas exportados do Room para versionamento e migrações
 │   └── src/
 │       ├── main/
-│       │   ├── AndroidManifest.xml     # Declaração de componentes do aplicativo
+│       │   ├── AndroidManifest.xml     # Declaração de componentes e Application do aplicativo
 │       │   ├── keepRules/              # Regras de R8/ProGuard para AGP 9
 │       │   ├── java/br/com/contador_presencial/
+│       │   │   ├── ContadorPresencialApplication.kt # Inicialização do AppContainer
 │       │   │   ├── MainActivity.kt     # Entry point e Composable da Tela Principal (Contador)
+│       │   │   ├── data/               # Camada de dados (Room, DAOs, Entidades, Mappers, Repositórios)
+│       │   │   ├── di/                 # Contêiner manual de dependências (AppContainer)
+│       │   │   ├── domain/             # Modelos de domínio e contratos de repositório
 │       │   │   ├── navigation/         # Camada de navegação tipada
 │       │   │   │   ├── Routes.kt       # Rotas tipadas serializáveis (@Serializable)
 │       │   │   │   └── AppNavHost.kt   # Definição e mapeamento do NavHost
 │       │   │   └── ui/                 # Camada de apresentação (Interface de Usuário)
 │       │   │       ├── screens/        # Telas da aplicação (Stateful & Stateless)
 │       │   │       │   └── configuration/
-│       │   │       │       └── ConfigurationScreen.kt
+│       │   │       │       ├── ConfigurationScreen.kt
+│       │   │       │       ├── ConfigurationUiState.kt
+│       │   │       │       └── ConfigurationViewModel.kt
 │       │   │       └── theme/          # Tema Material 3, Tipografia e Cores
 │       │   │           ├── Color.kt
 │       │   │           ├── Theme.kt
 │       │   │           └── Type.kt
 │       │   └── res/                    # Recursos de layout, ícones e strings (strings.xml)
-│       ├── test/                       # Testes unitários de JVM (JUnit 4)
-│       └── androidTest/                # Testes instrumentados na plataforma (Compose UI Test)
+│       ├── test/                       # Testes unitários de JVM (JUnit 4, Coroutines Test)
+│       └── androidTest/                # Testes instrumentados na plataforma (Compose UI Test, Room)
 ├── gradle/
 │   ├── libs.versions.toml              # Version Catalog centralizado de dependências
 │   └── wrapper/                        # Gradle Wrapper binaries (9.8.2)
