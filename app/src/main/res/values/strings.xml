@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">contador_presencial</string>
+    <string name="presencial_realizado">Presencial realizado</string>
+    <string name="configurations">Configuração</string>
+    <string name="configuration_title">Configurações</string>
+    <string name="back">Voltar</string>
+    <string name="target_days_label">Meta mensal de dias presenciais</string>
+    <string name="target_days_placeholder">Ex: 12</string>
+    <string name="target_days_helper">Informe a quantidade esperada de dias presenciais no mês</string>
+    <string name="save">Salvar</string>
 </resources>

@@ -26,8 +26,9 @@ This document provides architectural standards, development conventions, and ope
 | **JVM Target / Compatibility** | Java 11 (`JavaVersion.VERSION_11`) | Foojay toolchains resolver convention 1.0.0 |
 | **Compose BOM** | `2026.02.01` | Bill of Materials for Compose dependencies |
 | **UI Framework** | Jetpack Compose + Material 3 | Full declarative UI stack |
-| **Navigation** | Jetpack Navigation Compose `2.10.2` | Type-safe navigation ready |
-| **Serialization** | `kotlinx-serialization-json` `1.7.3` | Type-safe route arguments & data models |
+| **Material Icons** | Compose Material Icons Core (`material-icons-core`) | Core vector icons (`ArrowBack`, etc.) |
+| **Navigation** | Jetpack Navigation Compose `2.10.2` | Type-safe navigation with Kotlinx Serialization |
+| **Serialization** | `kotlinx-serialization-json` `1.7.3` + Kotlin Serialization plugin `2.2.10` | Type-safe route arguments & data models |
 
 ---
 
@@ -52,11 +53,18 @@ contador_presencial/
         │   ├── keepRules/
         │   │   └── rules.keep            # AGP 9 combined R8 keep rules
         │   ├── java/br/com/contador_presencial/
-        │   │   ├── MainActivity.kt       # Single activity entry point and top-level screen composables
-        │   │   └── ui/theme/
-        │   │       ├── Color.kt          # Material 3 color definitions (Dark & Light schemes)
-        │   │       ├── Theme.kt          # Theme wrapper with dynamic color support (Android 12+)
-        │   │       └── Type.kt           # Typography scale and text styles
+        │   │   ├── MainActivity.kt       # Single activity entry point and ContadorScreen composable
+        │   │   ├── navigation/
+        │   │   │   ├── Routes.kt         # Type-safe navigation routes (@Serializable)
+        │   │   │   └── AppNavHost.kt     # AppNavHost definition wiring routes and screens
+        │   │   └── ui/
+        │   │       ├── screens/
+        │   │       │   └── configuration/
+        │   │       │       └── ConfigurationScreen.kt # Configuration screen (Stateful & Stateless)
+        │   │       └── theme/
+        │   │           ├── Color.kt      # Material 3 color definitions (Dark & Light schemes)
+        │   │           ├── Theme.kt      # Theme wrapper with dynamic color support (Android 12+)
+        │   │           └── Type.kt       # Typography scale and text styles
         │   └── res/                      # Android resources (values, mipmaps, drawables, XML configs)
         ├── test/                         # Local JVM unit tests (JUnit 4)
         └── androidTest/                  # Instrumented on-device tests (Compose UI Test, Espresso)
@@ -100,6 +108,17 @@ contador_presencial/
   }
   ```
 - Any custom ProGuard/R8 keep rules should be placed in `app/src/main/keepRules/rules.keep`.
+
+### 4.5 Navigation & Architecture
+- **Type-Safe Navigation:**
+  - Define all destinations as `@Serializable` data objects or classes conforming to a sealed interface in `navigation/Routes.kt` (e.g., `Route.Home`, `Route.Configuration`).
+  - Configure `NavHost` in a standalone composable (`navigation/AppNavHost.kt`) passing explicit navigation lambda callbacks to screens (`onNavigateToConfiguration`, `onNavigateBack`), keeping screen composables decoupled from `NavController`.
+- **Screen Architecture & State Hoisting:**
+  - Screens must implement the Stateful / Stateless pattern:
+    - **Stateful Composable (e.g., `ConfigurationScreen`):** Manages UI state using `rememberSaveable` or `ViewModel` and wires navigation and business callbacks.
+    - **Stateless Composable (e.g., `ConfigurationContent`):** Receives UI state values and emits user interaction events upward; wraps UI in `Scaffold` and serves as the target for `@Preview`.
+- **Keyboard & Focus Handling:**
+  - For text input screens, manage keyboard options (`keyboardType`, `imeAction`) and dismiss or navigate focus via `LocalFocusManager.current` within `keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })`.
 
 ---
 
@@ -154,5 +173,8 @@ Execute the following Gradle tasks from the project root using `gradlew` (or `gr
    - Respect the established package hierarchy (`br.com.contador_presencial`).
    - Maintain idiomatic Kotlin style with concise, type-safe implementations.
    - Keep documentation, comments, and docstrings intact unless directly modified by requirements.
-4. **Validation:**
+4. **Continuous Documentation Updates (Mandatory):**
+   - **Always update both `AGENTS.md` and `README.md`** whenever new features, screens, routes, dependencies, architecture layers, or configurations are implemented or changed.
+   - Ensure the project structure tree, version tables, feature checklists, and technical guidelines reflect the latest state of the codebase.
+5. **Validation:**
    - Run `:app:assembleDebug` or `:app:testDebugUnitTest` to verify that changes compile cleanly before concluding a task.
